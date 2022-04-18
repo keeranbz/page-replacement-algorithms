@@ -7,10 +7,10 @@ import random
 import queue
 
 empty_frame = " "
-cli_num_pages = "-p"
-cli_num_frames = "-f"
-cli_page_val_range = "-pvrange"
-cli_pages = "-P"
+cli_num_pages = "-np"
+cli_num_frames = "-nf"
+cli_page_val_range = "-pvr"
+cli_pages = "-p"
 
 def FIFO (m_size, pages):
 	"FIFO page replacement algorithm."
@@ -60,29 +60,28 @@ def main():
 	# defaults for the number of pages and memory frames
 	number_of_frames = random.randint(1, 7)
 	number_of_pages = random.randint(1, 20)
-	page_value_range = [1,9]																		# no negative numbers
+	page_value_range = [1,9]																	# no negative numbers
 	pages = []
 	
 
 	# parse cli input
-	if len(sys.argv) > 2:	
-		if cli_num_pages in sys.argv:																# if number of pages is specified
-			number_of_pages = eval(sys.argv[sys.argv.index(cli_num_pages) + 1])
-		
-		if cli_num_frames in sys.argv:																# if number of frames is specified
-			number_of_frames = eval(sys.argv[sys.argv.index(cli_num_frames) + 1])
-		
-		if cli_page_val_range in sys.argv:															# if the range of page values is specified
-			page_value_range[0] = eval(sys.argv[sys.argv.index(cli_page_val_range) + 1])
-			page_value_range[1] = eval(sys.argv[sys.argv.index(cli_page_val_range) + 1])
+	if cli_num_pages in sys.argv:																# if number of pages is specified
+		number_of_pages = eval(sys.argv[sys.argv.index(cli_num_pages) + 1])
+	
+	if cli_num_frames in sys.argv:																# if number of frames is specified
+		number_of_frames = eval(sys.argv[sys.argv.index(cli_num_frames) + 1])
+	
+	if cli_page_val_range in sys.argv:															# if the range of page values is specified
+		page_value_range[0] = eval(sys.argv[sys.argv.index(cli_page_val_range) + 1])
+		page_value_range[1] = eval(sys.argv[sys.argv.index(cli_page_val_range) + 2])
 
-		if cli_pages in sys.argv:																	# if pages are manually specified
-			for i in range(sys.argv.index(cli_pages) + 1, len(sys.argv)):
-				if sys.argv[i].startswith("-"):
-					break
-				pages.append(eval(sys.argv[i]))
-		else:
-			pages = gen_list_rand_size(number_of_pages, page_value_range[0], page_value_range[1])	# randomly generate pages
+	if cli_pages in sys.argv:																	# if pages are manually specified
+		for i in range(sys.argv.index(cli_pages) + 1, len(sys.argv)):
+			if sys.argv[i].startswith("-"):
+				break
+			pages.append(eval(sys.argv[i]))
+	else:
+		pages = gen_list_rand_size(number_of_pages, page_value_range[0], page_value_range[1])	# randomly generate pages
 
 	# display input data
 	print("Pages: ", *pages)
