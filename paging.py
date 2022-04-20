@@ -2,6 +2,7 @@
 # Keeran Bezuidenhout
 # BZDKEE001
 
+from asyncio import futures
 import sys
 import random
 import queue
@@ -13,19 +14,19 @@ cli_page_val_range = "-pvr"
 cli_pages = "-p"
 
 def FIFO (m_size, pages):
-	"FIFO page replacement algorithm."
+	"First In First Out page replacement algorithm."
 
 	faults = 0										# faults will be output
 	frames = [empty_frame]*m_size					# 'empty' list that represents the frames
 	page_q = queue.Queue()							# queue to keep track of insert order of pages
 
 	for p in pages:
-		hit = is_hit(p, frames)						# if the page exists in the list of frames
-		space = is_hit(empty_frame, frames)			# if there is an 'empty' slot in the list of frames
-
-		if hit:										# it's already in memory, move on to next page
+		if is_hit(p, frames):						# it's already in memory, move on to next page
 			continue
 		
+		space = is_hit(empty_frame, frames)			# if there is an 'empty' slot in the list of frames
+
+
 		page_q.put(p)								# did not hit so need to insert to memory and add to queue
 		faults += 1
 
@@ -33,15 +34,86 @@ def FIFO (m_size, pages):
 			frames[frames.index(empty_frame)] = p
 			continue
 		
+		# page replacement
 		frames[frames.index(page_q.get())] = p		# replace oldest page
 
 	return faults
 
 def LRU (m_size, pages):
-	return 0
+	"Least Recently Used page replacement algorithm."
+
+	faults = 0										# faults will be output
+	frames = []										# empty list that represents the frames
+	age = {}										# dict to keep track of how long a page stays in memory
+
+	for p in pages:									
+		for key in age:								# increase each page age
+			age[key] += 1
+
+		if is_hit(p, frames):						# it's already in memory, move on to next page
+			age[p] = 0					
+			continue
+		
+		faults += 1
+
+		if len(frames) < m_size:					# if memory is not full just insert the page with an age of 0
+			frames.append(p)
+			age[p] = 0
+			continue
+
+		# find page to replace
+		max_age = 0
+		lrup = empty_frame
+
+		for key, value in age.items():				# iterate through dict for page with highest age
+			if value > max_age:
+				max_age = value
+				lrup = key
+		
+		# swap out oldest page for new page
+		frames.remove(lrup)
+		frames.append(p)
+		del age[lrup]
+		age[p] = 0
+
+		
+	return faults
+
 
 def OPT (m_size, pages):
-	return 0
+	"Optimal page replacement algorithm."
+	
+	faults = 0																# faults will be output
+	frames = []																# empty list that represents the frames
+
+	for p in range(len(pages)):									
+
+		if is_hit(pages[p], frames):										# it's already in memory, move on to next page					
+			continue
+		
+		faults += 1
+
+		if len(frames) < m_size:											# if memory is not full just insert the page with an age of 0
+			frames.append(pages[p])
+			continue
+
+		# find page to replace
+		furthest = frames[0]												# default to FIFO if no suitable replacement
+
+		future_pages = pages[p : len(pages)]								# slice a subset of the pages list to iterate through
+		for f in frames:													
+			if not (f in future_pages):										# if the page doesn't occur again choose it to replace
+				furthest = f
+				break
+
+			if future_pages.index(f) > future_pages.index(furthest):		# if the first occurence of this page in the future list is the furthest
+				furthest = f
+
+		# swap out pages
+		frames.remove(furthest)
+		frames.append(pages[p])
+
+	return faults
 
 
 def is_hit (page, frames):
