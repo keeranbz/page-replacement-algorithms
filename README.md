@@ -1,5 +1,11 @@
 ## Usage:
 
+[Run or Google Codelab](https://colab.research.google.com/drive/1WPJyUBqYP-olKSwZxjbkJ0S-Nw_GMAzJ?usp=sharing)
+
+
+OR
+<br>
+
 Run the program alone with random data or with optional arguments. Order of arguments does not matter.
 
 ```python
